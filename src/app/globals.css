@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* 라이트 값. 이름은 CLAUDE.md 디자인 토큰과 같다 (예: surface/page -> --surface-page) */
+:root {
+  --primary: #3182f6;
+  --surface-page: #f2f4f6;
+  --surface-card: #ffffff;
+  --text-primary: #191f28;
+  --text-secondary: #4e5968;
+  --text-muted: #8b95a1;
+  --text-on-primary: #ffffff;
+  --border-default: #e5e8eb;
+  --label-blue: #3182f6;
+  --label-blue-soft: #e8f3ff;
+  --label-green: #12a150;
+  --label-green-soft: #e3f8ec;
+  --label-orange: #f76808;
+  --label-orange-soft: #fff1e5;
+  --label-pink: #e5397a;
+  --label-pink-soft: #ffeaf1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #4d94ff;
+    --surface-page: #101014;
+    --surface-card: #1c1c22;
+    --text-primary: #f1f3f5;
+    --text-secondary: #b3bac2;
+    --text-muted: #6e7783;
+    --text-on-primary: #ffffff;
+    --border-default: #2a2a33;
+    --label-blue: #6aa6ff;
+    --label-blue-soft: #1d2a40;
+    --label-green: #3ccb7f;
+    --label-green-soft: #17302a;
+    --label-orange: #ff9446;
+    --label-orange-soft: #3a2817;
+    --label-pink: #ff6fa2;
+    --label-pink-soft: #3b1d2a;
+  }
+}
+
+@theme inline {
+  /* 토큰에 없는 기본 색·모서리·글자 크기는 쓰지 못하게 비운다 */
+  --color-*: initial;
+  --radius-*: initial;
+  --text-*: initial;
+
+  /* 색: bg-surface-page, text-text-primary, border-border-default, bg-label-blue-soft ... */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-primary: var(--primary);
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-primary: var(--text-on-primary);
+  --color-border-default: var(--border-default);
+  --color-label-blue: var(--label-blue);
+  --color-label-blue-soft: var(--label-blue-soft);
+  --color-label-green: var(--label-green);
+  --color-label-green-soft: var(--label-green-soft);
+  --color-label-orange: var(--label-orange);
+  --color-label-orange-soft: var(--label-orange-soft);
+  --color-label-pink: var(--label-pink);
+  --color-label-pink-soft: var(--label-pink-soft);
+
+  /* 간격: p-space-16, gap-space-8, mt-space-24 ... */
+  --spacing-space-4: 4px;
+  --spacing-space-8: 8px;
+  --spacing-space-12: 12px;
+  --spacing-space-16: 16px;
+  --spacing-space-20: 20px;
+  --spacing-space-24: 24px;
+  --spacing-space-34: 34px;
+  --spacing-space-48: 48px;
+  --spacing-space-64: 64px;
+
+  /* 모서리: rounded-sm(12) / md(16) / lg(20) / xl(24) / full(999) */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* 글꼴 */
+  --font-sans: "Noto Sans KR Variable", sans-serif;
+
+  /* 텍스트 스타일: text-heading-xl, text-body-md ... (크기·행간·자간·굵기가 한 번에 적용) */
+  --text-heading-xl: 28px;
+  --text-heading-xl--line-height: 38px;
+  --text-heading-xl--letter-spacing: -0.8px;
+  --text-heading-xl--font-weight: 700;
+  --text-heading-lg: 26px;
+  --text-heading-lg--line-height: 36px;
+  --text-heading-lg--letter-spacing: -0.8px;
+  --text-heading-lg--font-weight: 700;
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 28px;
+  --text-title-lg--letter-spacing: -0.4px;
+  --text-title-lg--font-weight: 700;
+  --text-title-md: 17px;
+  --text-title-md--line-height: 24px;
+  --text-title-md--letter-spacing: -0.3px;
+  --text-title-md--font-weight: 700;
+  --text-label-md: 15px;
+  --text-label-md--line-height: 22px;
+  --text-label-md--letter-spacing: -0.2px;
+  --text-label-md--font-weight: 700;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 28px;
+  --text-body-md--letter-spacing: -0.2px;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--letter-spacing: -0.1px;
+  --text-body-sm--font-weight: 400;
+  --text-caption-md: 15px;
+  --text-caption-md--line-height: 22px;
+  --text-caption-md--letter-spacing: -0.2px;
+  --text-caption-md--font-weight: 500;
+  --text-caption-sm: 13px;
+  --text-caption-sm--line-height: 18px;
+  --text-caption-sm--letter-spacing: 0px;
+  --text-caption-sm--font-weight: 500;
+  --text-button-md: 17px;
+  --text-button-md--line-height: 24px;
+  --text-button-md--letter-spacing: -0.2px;
+  --text-button-md--font-weight: 700;
+}
+
+/* 메모 작성 편집기. 상세 화면과 같은 글자 스타일로 보인다 */
+.memo-editor {
+  @apply min-h-[160px] px-space-20 py-space-16 text-body-md text-text-secondary outline-none;
+}
+/* 빈 문단 하나만 있을 때 보이는 안내 문구 */
+.memo-editor > p:only-child:has(> br:only-child)::before {
+  content: "내용을 입력하세요";
+  @apply text-text-muted;
+}
+/* 브라우저가 서식을 적용하며 문단을 겹쳐 만들기도 해서 깊이와 상관없이 이웃한 블록 사이를 띄운다 */
+.memo-editor :is(h2, h3, p, ul) + :is(h2, h3, p, ul) {
+  @apply mt-space-8;
+}
+.memo-editor h2 {
+  @apply text-title-lg text-text-primary;
+}
+.memo-editor h3 {
+  @apply text-title-md text-text-primary;
+}
+.memo-editor b,
+.memo-editor strong {
+  @apply font-bold text-text-primary;
+}
+.memo-editor ul {
+  @apply flex flex-col gap-space-4;
+}
+.memo-editor li {
+  @apply relative pl-space-16;
+}
+.memo-editor li::before {
+  content: "•";
+  @apply absolute left-0;
+}
+
+body {
+  background: var(--surface-page);
+  color: var(--text-primary);
+  word-break: keep-all;
+}

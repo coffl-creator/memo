@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메모리 카드 게임</title>
+<style>
+  :root {
+    --accent: #0071e3;
+    --accent-hover: #0a84ff;
+    --accent-soft: #2997ff;
+    --bg: #000000;
+    --surface: #1d1d1f;
+    --ink: #f5f5f7;
+    --muted: #a1a1a6;
+    --line: #2d2d30;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0, 113, 227, .3) 0%, rgba(0, 113, 227, 0) 70%),
+      var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 20px 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+  .sub { color: var(--muted); font-size: 18px; margin: 12px 0 32px; }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat {
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 16px;
+    color: var(--muted);
+  }
+  .stat b { color: var(--ink); font-weight: 600; margin-left: 6px; font-variant-numeric: tabular-nums; }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 24px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .2s ease;
+  }
+  .btn:hover { background: var(--accent-hover); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    width: min(100%, 480px);
+  }
+  .card {
+    aspect-ratio: 1;
+    perspective: 600px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+  }
+  .inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .45s ease;
+  }
+  .card.open .inner, .card.matched .inner { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .back {
+    background: linear-gradient(145deg, #0a84ff, #0058b8);
+    color: rgba(255, 255, 255, .55);
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .front {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 44px;
+    transform: rotateY(180deg);
+  }
+  .card.matched .front { border-color: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent-soft) inset; }
+  .card:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; border-radius: 20px; }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: var(--surface);
+    border-radius: 28px;
+    padding: 48px 40px;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+  }
+  .dialog h2 { font-size: 36px; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .dialog p { color: var(--muted); font-size: 18px; margin-bottom: 32px; }
+  .dialog p b { color: var(--ink); }
+
+  @media (max-width: 760px) {
+    h1 { font-size: 36px; }
+    .board { gap: 10px; }
+    .front { font-size: 34px; }
+    .back { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>메모리 카드 게임</h1>
+<p class="sub">같은 그림 두 장을 찾아 모두 맞춰 보세요.</p>
+
+<div class="bar">
+  <div class="stat">시도<b id="tries">0</b></div>
+  <div class="stat">시간<b id="time">0:00</b></div>
+  <button class="btn" id="restart" type="button">다시 시작</button>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="overlay" id="overlay">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+    <h2 id="clearTitle">🎉 클리어!</h2>
+    <p>시도 <b id="clearTries"></b>회, <b id="clearTime"></b> 만에 모두 맞췄어요.</p>
+    <button class="btn" id="again" type="button">다시 하기</button>
+  </div>
+</div>
+
+<script>
+  const EMOJIS = ["🐶", "🐱", "🦊", "🐼", "🐸", "🐵", "🦁", "🐯"];
+  const boardEl = document.getElementById("board");
+  const triesEl = document.getElementById("tries");
+  const timeEl = document.getElementById("time");
+  const overlay = document.getElementById("overlay");
+
+  let first = null;
+  let locked = false;
+  let tries = 0;
+  let matchedCount = 0;
+  let startedAt = 0;
+  let timer = null;
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function fmt(sec) {
+    return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+  }
+
+  function elapsed() {
+    return Math.floor((Date.now() - startedAt) / 1000);
+  }
+
+  function startTimer() {
+    startedAt = Date.now();
+    timer = setInterval(() => { timeEl.textContent = fmt(elapsed()); }, 250);
+  }
+
+  function stopTimer() {
+    clearInterval(timer);
+    timer = null;
+  }
+
+  function newGame() {
+    stopTimer();
+    first = null;
+    locked = false;
+    tries = 0;
+    matchedCount = 0;
+    triesEl.textContent = "0";
+    timeEl.textContent = "0:00";
+    overlay.classList.remove("show");
+    boardEl.innerHTML = "";
+
+    shuffle([...EMOJIS, ...EMOJIS]).forEach((emoji) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "card";
+      card.dataset.emoji = emoji;
+      card.setAttribute("aria-label", "카드");
+      card.innerHTML =
+        '<div class="inner">' +
+        '<div class="face back">?</div>' +
+        '<div class="face front">' + emoji + "</div>" +
+        "</div>";
+      card.addEventListener("click", () => flip(card));
+      boardEl.appendChild(card);
+    });
+  }
+
+  function flip(card) {
+    if (locked || card.classList.contains("open") || card.classList.contains("matched")) return;
+    if (!timer) startTimer();
+
+    card.classList.add("open");
+
+    if (!first) {
+      first = card;
+      return;
+    }
+
+    tries++;
+    triesEl.textContent = tries;
+    const second = card;
+
+    if (first.dataset.emoji === second.dataset.emoji) {
+      first.classList.replace("open", "matched");
+      second.classList.replace("open", "matched");
+      first = null;
+      matchedCount++;
+      if (matchedCount === EMOJIS.length) finish();
+    } else {
+      locked = true;
+      const a = first;
+      first = null;
+      setTimeout(() => {
+        a.classList.remove("open");
+        second.classList.remove("open");
+        locked = false;
+      }, 800);
+    }
+  }
+
+  function finish() {
+    stopTimer();
+    const t = fmt(elapsed());
+    timeEl.textContent = t;
+    document.getElementById("clearTries").textContent = tries;
+    document.getElementById("clearTime").textContent = t;
+    setTimeout(() => overlay.classList.add("show"), 500);
+  }
+
+  document.getElementById("restart").addEventListener("click", newGame);
+  document.getElementById("again").addEventListener("click", newGame);
+
+  newGame();
+</script>
+</body>
+</html>
